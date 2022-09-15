@@ -2,20 +2,20 @@
 % Please edit documentation in R/pgTools.R
 \name{vecToArrayStr}
 \alias{vecToArrayStr}
-\title{Write a PostgreSQL array as a string from a vector.}
+\title{Write a PostgreSQL array as a string using ARRAY[] format from a vector.}
 \usage{
-vecToArrayStr(x, double_quote = TRUE)
+vecToArrayStr(x, quote = TRUE)
 }
 \arguments{
 \item{x}{A vector.}
 
-\item{double_quote}{TRUE/FALSE, if TRUE, the elements of x will be double quoted.}
+\item{quote}{TRUE/FALSE, if TRUE, the elements of x will be quoted.}
 }
 \value{
 A string.
 }
 \description{
-Write a PostgreSQL array as a string from a vector.
+Write a PostgreSQL array as a string using ARRAY[] format from a vector.
 }
 \examples{
 vecToArrayStr(c("a", "b"))

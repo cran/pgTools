@@ -1,6 +1,6 @@
-bf5343ca89b6b97f9d2643210703f95c *DESCRIPTION
+25bdbbde4016f1985b7d57f814033cab *DESCRIPTION
 fd30cbe49cdfecd844defa951e594e45 *NAMESPACE
-3dfc480ca59218da60c062fb90cfaf21 *R/pgTools.R
+7dc774b6e63d6fd0b38b52c4861b9e3f *R/pgTools.R
 cbd112d1a16e82a9bb8c132356ca8470 *R/sysdata.rda
 048f999027f55a09a810ab72e611e944 *man/COPY.Rd
 f8e26dd541ad906c9523c29ad8a617d6 *man/DELETE.Rd
@@ -43,4 +43,5 @@ f5fcc7c8b6fb5de95b0e7776d32f36d2 *man/sqlNameWalk.Rd
 6550eeffe2788ce8af1957143398f0aa *man/sqlTypeWalk.Rd
 ef402ee523a4fc96c7c649c8fc5e7d25 *man/sql_80_char_comment.Rd
 80f4b2b2727eeffdc568c1a702c1dda7 *man/sql_comment.Rd
-9052ea677e110913b7fe537e4ce4a844 *man/vecToArrayStr.Rd
+f02827d2e8b162862fe83d41998a9c14 *man/vecToArrayStr.Rd
+583f1163c0bf23c19250d0cc87bb86b1 *man/vecToArrayStr2.Rd

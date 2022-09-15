@@ -56,15 +56,40 @@
 #' @format A vector
 "pg_data_types"
 
-#' Write a PostgreSQL array as a string from a vector.
+#' Write a PostgreSQL array as a string using {} format from a vector.
 #'
 #' @param x A vector.
 #' @param double_quote TRUE/FALSE, if TRUE, the elements of x will be double quoted.
 #' @return A string.
 #' @examples
+#' vecToArrayStr2(c("a", "b"))
+vecToArrayStr2 <- function(x, double_quote = TRUE){
+  if(double_quote){
+    x <- doubleQuoteText(unlist(x, use.names = FALSE))
+  }else{
+    x <- unlist(x, use.names = FALSE)
+  }
+  return(paste0("{", paste0(x, collapse = ", "), "}"))
+}
+
+#' Write a PostgreSQL array as a string using ARRAY[] format from a vector.
+#'
+#' @param x A vector.
+#' @param quote TRUE/FALSE, if TRUE, the elements of x will be quoted.
+#' @return A string.
+#' @examples
 #' vecToArrayStr(c("a", "b"))
-vecToArrayStr <- function(x, double_quote = TRUE){
-  return(paste0("{", paste0(if(double_quote){doubleQuoteText(x)}else{x}, collapse = ", "), "}"))
+vecToArrayStr <- function(x, quote = TRUE){
+  if(quote){
+    x <- quoteText(unlist(x, use.names = FALSE))
+  }else{
+    x <- unlist(x, use.names = FALSE)
+  }
+  if(length(x) == 0){
+    return("NULL")
+  }else{
+    return(paste0("ARRAY [", paste0("(", x, ")", collapse = ", "), "]"))
+  }
 }
 
 #' Write a PostgreSQL array as a string from a vector.
@@ -131,8 +156,8 @@ sqlTypeWalk <- function(x){
 #' @examples
 #' sqlNameWalk("column 100 - sample b")
 sqlNameWalk <- function(
-  x,
-  double_quote = FALSE
+    x,
+    double_quote = FALSE
 ){
   return(
     if(double_quote == TRUE){
@@ -158,7 +183,7 @@ sqlNameWalk <- function(
 #' @examples
 #' sql_comment("Sample single line comment.")
 sql_comment <- function(
-  x
+    x
 ){
   return(paste(paste0("--", x), sep = "", collapse = "\n"))
 }
@@ -187,9 +212,9 @@ sql_80_char_comment <- function(){
 #' constraints = list(sample_constraint = "UNIQUE(col3)")
 #' ))
 create_sql_script <- function(
-  ...,
-  path = NULL,
-  con = NULL
+    ...,
+    path = NULL,
+    con = NULL
 ){
   x <- paste(..., sep = "\n\n")
   if(is.null(path) == FALSE){
@@ -222,18 +247,18 @@ create_sql_script <- function(
 #' @examples
 #' createDATABASE("dbTest01")
 createDATABASE <- function(
-  name,
-  owner = NULL,
-  template = NULL,
-  encoding = NULL,
-  locale = NULL,
-  lc_collate = NULL,
-  lc_ctype = NULL,
-  tablespace = NULL,
-  allow_connections = NULL,
-  connection_limit = NULL,
-  is_template = NULL,
-  con = NULL
+    name,
+    owner = NULL,
+    template = NULL,
+    encoding = NULL,
+    locale = NULL,
+    lc_collate = NULL,
+    lc_ctype = NULL,
+    tablespace = NULL,
+    allow_connections = NULL,
+    connection_limit = NULL,
+    is_template = NULL,
+    con = NULL
 ){
   with <- c(
     "OWNER" = owner,
@@ -280,14 +305,14 @@ createDATABASE <- function(
 #' @examples
 #' alterDATABASE("dbTest01", rename_to = "dbProd01")
 alterDATABASE <- function(
-  name,
-  allow_connections = NULL,
-  connection_limit = NULL,
-  is_template = NULL,
-  rename_to = NULL,
-  owner_to = NULL,
-  set_tablespace = NULL,
-  con = NULL
+    name,
+    allow_connections = NULL,
+    connection_limit = NULL,
+    is_template = NULL,
+    rename_to = NULL,
+    owner_to = NULL,
+    set_tablespace = NULL,
+    con = NULL
 ){
   with <- c("ALLOW_CONNECTIONS" = allow_connections, "CONNECTION LIMIT" = connection_limit, "IS_TEMPLATE" = is_template)
   if(is.null(with) == FALSE){
@@ -334,10 +359,10 @@ alterDATABASE <- function(
 #' @examples
 #' dropDATABASE("dbTest01")
 dropDATABASE <- function(
-  name,
-  if_exists = FALSE,
-  force = FALSE,
-  con = NULL
+    name,
+    if_exists = FALSE,
+    force = FALSE,
+    con = NULL
 ){
   x <- paste(
     paste(paste0("DROP DATABASE ", if(if_exists == TRUE){"IF EXISTS "}else{""}, name, if(force == TRUE){" FORCE;"}else{";"}), sep = "", collapse = "\n"),
@@ -362,10 +387,10 @@ dropDATABASE <- function(
 #' @examples
 #' createSCHEMA("dev")
 createSCHEMA <- function(
-  name,
-  authorization = NULL,
-  if_not_exists = FALSE,
-  con = NULL
+    name,
+    authorization = NULL,
+    if_not_exists = FALSE,
+    con = NULL
 ){
   x <- paste(paste0("CREATE SCHEMA ", if(if_not_exists == TRUE){"IF NOT EXISTS "}else{""}, name, if(is.null(authorization) == FALSE){paste0(" AUTHORIZATION ", authorization, ";")}else{";"}), sep = "", collapse = "\n")
   if(is.null(con) == TRUE){
@@ -387,10 +412,10 @@ createSCHEMA <- function(
 #' @examples
 #' alterSCHEMA("dev", rename_to = "prod")
 alterSCHEMA <- function(
-  name,
-  rename_to = NULL,
-  owner_to = NULL,
-  con = NULL
+    name,
+    rename_to = NULL,
+    owner_to = NULL,
+    con = NULL
 ){
   alt <- c("RENAME TO" = rename_to, "OWNER TO" = owner_to)
   alt <- paste(names(alt), alt)
@@ -422,11 +447,11 @@ alterSCHEMA <- function(
 #' @examples
 #' dropSCHEMA("dev")
 dropSCHEMA <- function(
-  name,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    name,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
   x <- paste(
     paste0("DROP SCHEMA ", if(if_exists == TRUE){"IF EXISTS "}else{""}, name, if(cascade == TRUE){" CASCADE"}else{""}, if(restrict == TRUE){" RESTRICT"}else{""}, ";"),
@@ -453,12 +478,12 @@ dropSCHEMA <- function(
 #' @examples
 #' createEXTENSION("pgcrypto")
 createEXTENSION <- function(
-  name,
-  if_not_exists = FALSE,
-  schema = NULL,
-  version = NULL,
-  cascade = FALSE,
-  con = NULL
+    name,
+    if_not_exists = FALSE,
+    schema = NULL,
+    version = NULL,
+    cascade = FALSE,
+    con = NULL
 ){
   x <- paste(
     paste0(
@@ -492,11 +517,11 @@ createEXTENSION <- function(
 #' @examples
 #' dropEXTENSION("pgcrypto")
 dropEXTENSION <- function(
-  name,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    name,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
   x <- paste(
     paste0("DROP EXTENSION ", if(if_exists == TRUE){"IF EXISTS "}else{""}, name, if(cascade == TRUE){" CASCADE"}else{""}, if(restrict == TRUE){" RESTRICT"}else{""}, ";"),
@@ -529,14 +554,14 @@ dropEXTENSION <- function(
 #' constraints = list(sample_constraint = "UNIQUE(col3)")
 #' )
 createTABLE <- function(
-  name,
-  columns,
-  select = NULL,
-  constraints = NULL,
-  temporary = FALSE,
-  if_not_exists = FALSE,
-  unlogged = FALSE,
-  con = NULL
+    name,
+    columns,
+    select = NULL,
+    constraints = NULL,
+    temporary = FALSE,
+    if_not_exists = FALSE,
+    unlogged = FALSE,
+    con = NULL
 ){
   if(is.null(select) == FALSE){
     x <- paste0(
@@ -577,12 +602,12 @@ createTABLE <- function(
 #' @examples
 #' alterTABLE("sample", action = c("ADD COLUMN IF NOT EXISTS col4 BOOLEAN"))
 alterTABLE <- function(
-  name,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  action,
-  con = NULL
+    name,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    action,
+    con = NULL
 ){
   x <- paste(
     paste0(
@@ -617,11 +642,11 @@ alterTABLE <- function(
 #' @examples
 #' dropTABLE("sample")
 dropTABLE <- function(
-  name,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    name,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
   x <- paste(
     paste0(
@@ -659,12 +684,12 @@ dropTABLE <- function(
 #' definition = "INSERT INTO tbl(col1, col2) VALUES (a, b);"
 #' )
 createPROCEDURE <- function(
-  name,
-  args = NULL,
-  or_replace = FALSE,
-  language = "SQL",
-  definition,
-  con = NULL
+    name,
+    args = NULL,
+    or_replace = FALSE,
+    language = "SQL",
+    definition,
+    con = NULL
 ){
   x <- paste0(
     "CREATE ", if(or_replace == TRUE){"OR REPLACE "}else{""}, "PROCEDURE ",
@@ -699,12 +724,12 @@ createPROCEDURE <- function(
 #' args = list(a = "INTEGER", b = "TEXT")
 #' )
 dropPROCEDURE <- function(
-  name,
-  args = NULL,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    name,
+    args = NULL,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
   x <- paste0(
     "DROP PROCEDURE ", if(if_exists == TRUE){"IF EXISTS "}else{""},
@@ -743,14 +768,14 @@ dropPROCEDURE <- function(
 #' definition = "BEGIN RETURN sample_add.a + sample_add.b; END;"
 #' )
 createFUNCTION <- function(
-  name,
-  args = NULL,
-  or_replace = FALSE,
-  returns = NULL,
-  returns_table = NULL,
-  language = "SQL",
-  definition,
-  con = NULL
+    name,
+    args = NULL,
+    or_replace = FALSE,
+    returns = NULL,
+    returns_table = NULL,
+    language = "SQL",
+    definition,
+    con = NULL
 ){
   x <- paste0(
     "CREATE ", if(or_replace == TRUE){"OR REPLACE "}else{""}, "FUNCTION ",
@@ -787,12 +812,12 @@ createFUNCTION <- function(
 #' args = list(a = "INTEGER", b = "TEXT")
 #' )
 dropFUNCTION <- function(
-  name,
-  args = NULL,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    name,
+    args = NULL,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
   x <- paste0(
     "DROP FUNCTION ", if(if_exists == TRUE){"IF EXISTS "}else{""},
@@ -831,13 +856,13 @@ dropFUNCTION <- function(
 #' func = "function_sample()"
 #' )
 createTRIGGER <- function(
-  name,
-  when,
-  event,
-  on,
-  for_each_row = FALSE,
-  func,
-  con = NULL
+    name,
+    when,
+    event,
+    on,
+    for_each_row = FALSE,
+    func,
+    con = NULL
 ){
   x <- paste0(
     "CREATE TRIGGER ", name, "\n",
@@ -869,12 +894,12 @@ createTRIGGER <- function(
 #' on = "sample_table"
 #' )
 dropTRIGGER <- function(
-  name,
-  on,
-  if_exists = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    name,
+    on,
+    if_exists = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
   x <- paste0(
     "DROP TRIGGER ", if(if_exists == TRUE){"IF EXISTS "}else{""},
@@ -902,9 +927,9 @@ dropTRIGGER <- function(
 #' @examples
 #' quoteText2("Sample quotes.")
 quoteText2 <- function(
-  x,
-  char_only = TRUE,
-  excluded_chars = c("NULL")
+    x,
+    char_only = TRUE,
+    excluded_chars = c("NULL")
 ){
   if(char_only == TRUE){
     x[is.character(x) & !(x %in% excluded_chars) & !(is.null(x) == TRUE|is.na(x) == TRUE)] <- stringi::stri_join("'", gsub("\'", "''", x[is.character(x) & !(x %in% excluded_chars) & !(is.null(x) == TRUE|is.na(x) == TRUE)], fixed = TRUE), "'")
@@ -981,23 +1006,23 @@ insert_table_chunker <- function(x, n_batches, batch_size){
 #' cast = TRUE
 #' )
 INSERT <- function(
-  x = NULL,
-  schema = NULL,
-  table,
-  types = NULL,
-  returning = NULL,
-  quote_text = TRUE,
-  cast = TRUE,
-  prepare = TRUE,
-  batch_size = 50000,
-  double_quote_names = FALSE,
-  select = NULL,
-  select_cols = NULL,
-  con = NULL,
-  n_cores = 1,
-  table_is_temporary = FALSE,
-  retain_insert_order = FALSE,
-  connect_db_name = NULL
+    x = NULL,
+    schema = NULL,
+    table,
+    types = NULL,
+    returning = NULL,
+    quote_text = TRUE,
+    cast = TRUE,
+    prepare = TRUE,
+    batch_size = 50000,
+    double_quote_names = FALSE,
+    select = NULL,
+    select_cols = NULL,
+    con = NULL,
+    n_cores = 1,
+    table_is_temporary = FALSE,
+    retain_insert_order = FALSE,
+    connect_db_name = NULL
 ){
   if(is.null(select)){
     x <- as.list(x)
@@ -1309,16 +1334,16 @@ INSERT <- function(
 #' cast = TRUE
 #' )
 UPDATE <- function(
-  x,
-  schema = NULL,
-  table,
-  where = list(),
-  prepare = TRUE,
-  types = NULL,
-  returning = NULL,
-  quote_text = TRUE,
-  cast = TRUE,
-  con = NULL
+    x,
+    schema = NULL,
+    table,
+    where = list(),
+    prepare = TRUE,
+    types = NULL,
+    returning = NULL,
+    quote_text = TRUE,
+    cast = TRUE,
+    con = NULL
 ){
 
   if(is.list(x) == TRUE){
@@ -1440,10 +1465,10 @@ UPDATE <- function(
 #' )
 #' )
 DELETE <- function(
-  schema = NULL,
-  table,
-  where = NULL,
-  con = NULL
+    schema = NULL,
+    table,
+    where = NULL,
+    con = NULL
 ){
 
   x <- paste0(
@@ -1484,13 +1509,13 @@ DELETE <- function(
 #' table = "table1"
 #' )
 TRUNCATE <- function(
-  schema = NULL,
-  table,
-  restart_identity = FALSE,
-  continue_identity = FALSE,
-  cascade = FALSE,
-  restrict = FALSE,
-  con = NULL
+    schema = NULL,
+    table,
+    restart_identity = FALSE,
+    continue_identity = FALSE,
+    cascade = FALSE,
+    restrict = FALSE,
+    con = NULL
 ){
 
   x <- paste0(
@@ -1531,13 +1556,13 @@ TRUNCATE <- function(
 #' types = c("INT", "INT")
 #' )
 callFUNCTION <- function(
-  x = list(),
-  schema = NULL,
-  func,
-  quote_text = TRUE,
-  cast = TRUE,
-  types,
-  con = NULL
+    x = list(),
+    schema = NULL,
+    func,
+    quote_text = TRUE,
+    cast = TRUE,
+    types,
+    con = NULL
 ){
 
   if(is.list(x) == TRUE){
@@ -1587,13 +1612,13 @@ callFUNCTION <- function(
 #' types = c("INT", "INT")
 #' )
 callPROCEDURE <- function(
-  x = list(),
-  schema = NULL,
-  proc,
-  quote_text = TRUE,
-  cast = TRUE,
-  types,
-  con = NULL
+    x = list(),
+    schema = NULL,
+    proc,
+    quote_text = TRUE,
+    cast = TRUE,
+    types,
+    con = NULL
 ){
 
   if(is.list(x) == TRUE){
@@ -1639,13 +1664,13 @@ callPROCEDURE <- function(
 #' from = "schema1.table1"
 #' )
 querySELECT <- function(
-  select,
-  from = list(),
-  where = NULL,
-  group_by = NULL,
-  having = NULL,
-  order_by = NULL,
-  con = NULL
+    select,
+    from = list(),
+    where = NULL,
+    group_by = NULL,
+    having = NULL,
+    order_by = NULL,
+    con = NULL
 ){
 
   x <- paste0(
@@ -1722,16 +1747,16 @@ querySELECT <- function(
 #' file = "/home/test/test.csv"
 #' )
 COPY <- function(
-  schema = NULL,
-  table,
-  columns = NULL,
-  file,
-  type = "FROM",
-  delimiter = ",",
-  format = "csv",
-  query = NULL,
-  header = TRUE,
-  con = NULL
+    schema = NULL,
+    table,
+    columns = NULL,
+    file,
+    type = "FROM",
+    delimiter = ",",
+    format = "csv",
+    query = NULL,
+    header = TRUE,
+    con = NULL
 ){
 
   if(header == TRUE){
@@ -1811,11 +1836,11 @@ COPY <- function(
 #' data_type = "text"
 #' )
 pg_addColumn <- function(
-  column_name,
-  data_type,
-  default = NULL,
-  constraint = NULL,
-  if_not_exists = FALSE
+    column_name,
+    data_type,
+    default = NULL,
+    constraint = NULL,
+    if_not_exists = FALSE
 ){
   return(
     paste0("ADD COLUMN ", if(if_not_exists == TRUE){"IF NOT EXISTS "}else{""}, column_name, " ", data_type, if(is.null(default) == TRUE){""}else{paste0(" DEFAULT ", default)}, if(is.null(constraint) == TRUE){""}else{paste0(" ", constraint)})
@@ -1834,10 +1859,10 @@ pg_addColumn <- function(
 #' column_name = "newCol"
 #' )
 pg_dropColumn <- function(
-  column_name,
-  cascade = FALSE,
-  restrict = FALSE,
-  if_exists = FALSE
+    column_name,
+    cascade = FALSE,
+    restrict = FALSE,
+    if_exists = FALSE
 ){
   return(
     paste0("DROP COLUMN ", if(if_exists == TRUE){"IF EXISTS "}else{""}, column_name, if(cascade == TRUE){" CASCADE"}else{""}, if(restrict == TRUE){" RESTRICT"}else{""})
@@ -1856,9 +1881,9 @@ pg_dropColumn <- function(
 #' data_type = "text"
 #' )
 pg_alterColumnType <- function(
-  column_name,
-  data_type,
-  using = NULL
+    column_name,
+    data_type,
+    using = NULL
 ){
   return(
     if(is.null(using) == TRUE){
@@ -1880,8 +1905,8 @@ pg_alterColumnType <- function(
 #' new_column_name = "col1"
 #' )
 pg_renameColumn <- function(
-  column_name,
-  new_column_name
+    column_name,
+    new_column_name
 ){
   return(
     paste0("RENAME COLUMN ", column_name, " TO ", new_column_name)
@@ -1897,7 +1922,7 @@ pg_renameColumn <- function(
 #' new_table_name = "table1"
 #' )
 pg_renameTable <- function(
-  new_table_name
+    new_table_name
 ){
   return(
     paste0("RENAME TO ", new_table_name)
