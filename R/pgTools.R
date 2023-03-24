@@ -954,6 +954,7 @@ insert_batch_chunker <- function(x, n_batches, batch_size){
   i <- seq_len(n_batches)
   starts <- batch_size*i - batch_size + 1
   ends <- batch_size*i
+  ends[length(ends)] <- as.character(length(x))
   str <- paste0("list(", paste0(shQuote(i), " = x[", starts, ":", ends,"]", collapse = ", "), ")")
   return(eval(str2expression(str)))
 }
@@ -970,6 +971,7 @@ insert_table_chunker <- function(x, n_batches, batch_size){
   i <- seq_len(n_batches)
   starts <- batch_size*i - batch_size + 1
   ends <- batch_size*i
+  ends[length(ends)] <- as.character(nrow(x))
   str <- paste0("list(", paste0(shQuote(i), " = x[", starts, ":", ends,", ]", collapse = ", "), ")")
   return(eval(str2expression(str)))
 }
